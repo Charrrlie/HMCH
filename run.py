@@ -52,8 +52,8 @@ def calc_loss(img_model, txt_model, cls_model, X, Y, B, F, G, L, cls_criterion):
             loss_cls += (cls_criterion(predict_f, label) + cls_criterion(predict_g, label))*batch_size
             
     with torch.no_grad():
-        quant_loss = opt.beta * (torch.sum(torch.pow(B - F, 2) + torch.pow(B - G, 2)))
-        balance_loss = opt.gamma * torch.sum(torch.pow(F.sum(dim=0), 2) + torch.pow(G.sum(dim=0), 2))
+        quant_loss = opt.alpha * (torch.sum(torch.pow(B - F, 2) + torch.pow(B - G, 2)))
+        balance_loss = opt.beta * torch.sum(torch.pow(F.sum(dim=0), 2) + torch.pow(G.sum(dim=0), 2))
 
     loss = loss_cls + quant_loss + balance_loss
     print(loss_cls, quant_loss, balance_loss)
@@ -201,8 +201,9 @@ def train(**kwargs):
         print("Task  1 ---")
         
         # === loss 1 task ===
-        loss_1 = calc_loss(img_model, txt_model, cls1_model, train_x, train_y, B, F_buffer, G_buffer, train_label1, cls_criterion)
-        writer.add_scalar('Task 1 loss', loss_1, epoch)
+        if opt.cal_loss:
+            loss_1 = calc_loss(img_model, txt_model, cls1_model, train_x, train_y, B, F_buffer, G_buffer, train_label1, cls_criterion)
+            writer.add_scalar('Task 1 loss', loss_1, epoch)
 
         # === train image net & update F & classifier1
         for i in tqdm(range(num_train // opt.batch_size)):
@@ -270,8 +271,9 @@ def train(**kwargs):
         B = torch.sign(F_buffer + G_buffer)
 
         # === loss 2 task ===
-        loss_2 = calc_loss(img_model, txt_model, cls2_model, train_x, train_y, B, F_buffer, G_buffer, train_label2, cls_criterion)
-        writer.add_scalar('Task 2 loss', loss_2, epoch)
+        if opt.cal_loss:
+            loss_2 = calc_loss(img_model, txt_model, cls2_model, train_x, train_y, B, F_buffer, G_buffer, train_label2, cls_criterion)
+            writer.add_scalar('Task 2 loss', loss_2, epoch)
 
         # ======== train l2  
         print("Task 2 ---")

@@ -10,7 +10,7 @@ class DefaultConfig(object):
     vgg_path = './data/imagenet-vgg-f.mat'
 
     # === data parameters
-    is_FashionVC = False
+    is_FashionVC = True
     if is_FashionVC:
         data_path = './data/FashionVC/'
         training_size = 16862
@@ -45,6 +45,7 @@ class DefaultConfig(object):
 
     use_gpu = True
     valid = True
+    cal_loss = True
 
     result_dir = 'result'
 
